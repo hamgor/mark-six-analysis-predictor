@@ -4,7 +4,7 @@ interface RetroCardProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
-  headerColor?: 'neon' | 'sapphire' | 'ice';
+  headerColor?: 'neon' | 'sapphire' | 'ice'; // Kept for API compatibility, mapped to green intensities
   animate?: boolean;
 }
 export function RetroCard({
@@ -14,43 +14,32 @@ export function RetroCard({
   headerColor = 'neon',
   animate = true
 }: RetroCardProps) {
-  const borderColors = {
-    neon: 'border-cyber-neon/40',
-    sapphire: 'border-cyber-sapphire/40',
-    ice: 'border-cyber-ice/20',
-  };
-  const headerGradients = {
-    neon: 'from-cyber-sapphire/80 to-cyber-navy/90',
-    sapphire: 'from-blue-900/80 to-cyber-navy/90',
-    ice: 'from-cyber-ice/10 to-cyber-navy/90',
-  };
   return (
     <div className={cn(
-      "flex flex-col overflow-hidden holographic",
-      animate && "animate-float",
-      borderColors[headerColor],
-      "shadow-[0_0_15px_rgba(0,212,255,0.1)]",
+      "flex flex-col overflow-hidden bg-matrix-dark/80 border-[4px] border-matrix-dim relative",
+      "shadow-[0_0_20px_rgba(0,59,0,0.5)]",
+      animate && "animate-phosphor-flicker",
       className
     )}>
+      {/* Corner "Screws" */}
+      <div className="absolute top-1 left-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
+      <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
+      <div className="absolute bottom-1 left-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
+      <div className="absolute bottom-1 right-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
       {title && (
-        <div className={cn(
-          "px-4 py-2 border-b font-mono uppercase tracking-[0.25em] text-[10px] md:text-xs flex justify-between items-center bg-gradient-to-r",
-          borderColors[headerColor],
-          headerGradients[headerColor]
-        )}>
-          <span className="text-cyber-ice font-bold glow-text drop-shadow-[0_0_8px_rgba(0,212,255,0.6)]">
-            {title}
+        <div className="px-4 py-2 border-b-[4px] border-matrix-dim bg-matrix-dim/20 flex justify-between items-center">
+          <span className="text-matrix-green font-mono font-black uppercase tracking-[0.2em] text-xs glow-text">
+            [ {title} ]
           </span>
-          <div className="flex gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-cyber-sapphire animate-pulse" />
-            <div className="w-1.5 h-1.5 rounded-full bg-cyber-neon shadow-[0_0_10px_rgba(0,212,255,1)]" />
+          <div className="flex gap-1.5">
+            <div className="w-2 h-2 bg-matrix-green animate-pulse shadow-[0_0_5px_#00FF41]" />
+            <div className="w-2 h-2 bg-matrix-dark border border-matrix-dim" />
           </div>
         </div>
       )}
-      <div className="flex-1 p-5 overflow-auto scrollbar-thin scrollbar-thumb-cyber-sapphire bg-black/20">
+      <div className="flex-1 p-6 overflow-auto industrial-inset bg-black/40">
         {children}
       </div>
-      <div className="h-[1px] w-full bg-gradient-to-r from-transparent via-cyber-neon/30 to-transparent" />
     </div>
   );
 }

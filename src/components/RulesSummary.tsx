@@ -1,5 +1,5 @@
 import React from 'react';
-import { Flame, Snowflake, Link, Target } from 'lucide-react';
+import { Activity, Zap, Cpu, Scan } from 'lucide-react';
 import { HotColdStats, PairStats } from '@/lib/analyzer';
 interface RulesSummaryProps {
   stats: HotColdStats;
@@ -8,58 +8,57 @@ interface RulesSummaryProps {
 }
 export function RulesSummary({ stats, pairs, coverage }: RulesSummaryProps) {
   return (
-    <div className="space-y-6 font-mono text-[10px] md:text-[11px] leading-relaxed">
+    <div className="space-y-6 font-mono text-[11px] leading-relaxed">
       <div>
-        <div className="flex items-center gap-2 text-cyber-neon font-bold tracking-widest mb-3 uppercase">
-          <Flame size={14} className="text-orange-500" />
-          <span>P-03: HOT_ZONE_VECTORS</span>
+        <div className="flex items-center gap-2 text-matrix-green font-black tracking-widest mb-3 uppercase">
+          <Zap size={16} />
+          <span>H_ZONE_ANALYSIS</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {stats.hot.map(s => (
-            <span key={s.number} className="px-2 py-0.5 border border-cyber-neon/20 bg-cyber-neon/5 text-cyber-ice">
+            <span key={s.number} className="px-3 py-1 border-2 border-matrix-green bg-matrix-green/10 text-matrix-green font-black">
               {s.number.toString().padStart(2, '0')}
             </span>
           ))}
         </div>
       </div>
-      <div className="h-[1px] bg-cyber-sapphire/20" />
+      <div className="border-t-2 border-matrix-dim/20" />
       <div>
-        <div className="flex items-center gap-2 text-cyber-ice/40 font-bold tracking-widest mb-3 uppercase">
-          <Snowflake size={14} className="text-blue-300" />
-          <span>P-04: COLD_LOGIC_NODES</span>
+        <div className="flex items-center gap-2 text-matrix-dim font-black tracking-widest mb-3 uppercase">
+          <Cpu size={16} />
+          <span>C_ZONE_LOGIC</span>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-2 opacity-60">
           {stats.cold.map(s => (
-            <span key={s.number} className="px-2 py-0.5 border border-cyber-ice/10 text-cyber-ice/40">
+            <span key={s.number} className="px-3 py-1 border-2 border-matrix-dim text-matrix-dim">
               {s.number.toString().padStart(2, '0')}
             </span>
           ))}
         </div>
       </div>
-      <div className="h-[1px] bg-cyber-sapphire/20" />
+      <div className="border-t-2 border-matrix-dim/20" />
       <div>
-        <div className="flex items-center gap-2 text-cyber-accent font-bold tracking-widest mb-3 uppercase">
-          <Link size={14} />
-          <span>FREQUENT_CO_VECTORS</span>
+        <div className="flex items-center gap-2 text-matrix-green font-black tracking-widest mb-3 uppercase">
+          <Scan size={16} />
+          <span>PAIR_CO_VECTORS</span>
         </div>
-        <div className="space-y-1">
+        <div className="space-y-2">
           {pairs.map((p, idx) => (
-            <div key={idx} className="flex justify-between items-center text-cyber-ice/60 border-l border-cyber-accent/30 pl-3">
-              <span>{p.pair[0].toString().padStart(2, '0')} ↔ {p.pair[1].toString().padStart(2, '0')}</span>
-              <span className="text-[9px] opacity-40">STRENGTH: {p.count}x</span>
+            <div key={idx} className="flex justify-between items-center text-matrix-green/80 border-l-4 border-matrix-dim pl-3">
+              <span className="font-black">{p.pair[0].toString().padStart(2, '0')} <-> {p.pair[1].toString().padStart(2, '0')}</span>
+              <span className="text-[10px] bg-matrix-dim/20 px-1 font-bold">W:{p.count}</span>
             </div>
           ))}
         </div>
       </div>
-      <div className="h-[1px] bg-cyber-sapphire/20" />
+      <div className="border-t-2 border-matrix-dim/20" />
       <div>
-        <div className="flex items-center gap-2 text-cyber-ice font-bold tracking-widest mb-3 uppercase">
-          <Target size={14} className="text-cyber-neon" />
-          <span>75%_COVERAGE_POOL</span>
+        <div className="flex items-center gap-2 text-matrix-green font-black tracking-widest mb-3 uppercase">
+          <Activity size={16} />
+          <span>75PCT_POOL_SNAPSHOT</span>
         </div>
-        <p className="text-cyber-ice/40 mb-2 leading-tight">Minimum set required to account for bulk of weighted probability distribution.</p>
-        <div className="text-cyber-ice break-all tracking-tighter">
-          {coverage.map(n => n.toString().padStart(2, '0')).join(', ')}
+        <div className="text-matrix-dim/80 text-[10px] break-all tracking-widest bg-black/40 p-2 border border-matrix-dim/30">
+          {coverage.map(n => n.toString().padStart(2, '0')).join(' ')}
         </div>
       </div>
     </div>
