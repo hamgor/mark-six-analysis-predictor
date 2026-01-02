@@ -11,10 +11,11 @@ export default {
   		colors: {
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
-        'retro-black': '#050505',
-        'retro-green': '#00FF41',
-        'retro-pink': '#FF003C',
-        'retro-cyan': '#00F0FF',
+        'cyber-navy': '#0A0F2B',
+        'cyber-neon': '#00D4FF',
+        'cyber-sapphire': '#1E3A8A',
+        'cyber-ice': '#A5F3FC',
+        'cyber-accent': '#7000FF',
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
   				foreground: 'hsl(var(--primary-foreground))'
@@ -27,21 +28,30 @@ export default {
   		},
       keyframes: {
         glitch: {
-          '0%': { transform: 'translate(0)' },
-          '20%': { transform: 'translate(-2px, 2px)' },
-          '40%': { transform: 'translate(-2px, -2px)' },
-          '60%': { transform: 'translate(2px, 2px)' },
-          '80%': { transform: 'translate(2px, -2px)' },
-          '100%': { transform: 'translate(0)' },
+          '0%': { transform: 'translate(0)', opacity: '1' },
+          '25%': { transform: 'translate(-1px, 1px)', opacity: '0.8' },
+          '50%': { transform: 'translate(1px, -1px)', opacity: '1' },
+          '75%': { transform: 'translate(-1px, -1px)', opacity: '0.9' },
+          '100%': { transform: 'translate(0)', opacity: '1' },
         },
         scanline: {
           '0%': { transform: 'translateY(-100%)' },
           '100%': { transform: 'translateY(100%)' },
+        },
+        'pulse-glow': {
+          '0%, 100%': { boxShadow: '0 0 5px rgba(0, 212, 255, 0.2)' },
+          '50%': { boxShadow: '0 0 20px rgba(0, 212, 255, 0.5)' },
+        },
+        float: {
+          '0%, 100%': { transform: 'translateY(0)' },
+          '50%': { transform: 'translateY(-5px)' },
         }
       },
       animation: {
-        glitch: 'glitch 0.2s ease-in-out infinite',
-        scanline: 'scanline 8s linear infinite',
+        glitch: 'glitch 0.5s ease-in-out infinite',
+        scanline: 'scanline 4s linear infinite',
+        'pulse-glow': 'pulse-glow 3s ease-in-out infinite',
+        float: 'float 6s ease-in-out infinite',
       }
   	}
   },

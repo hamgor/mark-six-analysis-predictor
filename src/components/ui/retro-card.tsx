@@ -4,46 +4,47 @@ interface RetroCardProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
-  headerColor?: 'green' | 'pink' | 'cyan';
+  headerColor?: 'neon' | 'sapphire' | 'ice';
 }
-export function RetroCard({ 
-  title, 
-  children, 
-  className, 
-  headerColor = 'green' 
+export function RetroCard({
+  title,
+  children,
+  className,
+  headerColor = 'neon'
 }: RetroCardProps) {
   const borderColors = {
-    green: 'border-retro-green',
-    pink: 'border-retro-pink',
-    cyan: 'border-retro-cyan',
+    neon: 'border-cyber-neon/50',
+    sapphire: 'border-cyber-sapphire/50',
+    ice: 'border-cyber-ice/30',
   };
-  const textColors = {
-    green: 'text-retro-green',
-    pink: 'text-retro-pink',
-    cyan: 'text-retro-cyan',
+  const headerGradients = {
+    neon: 'from-cyber-sapphire to-cyber-navy',
+    sapphire: 'from-blue-900 to-cyber-navy',
+    ice: 'from-cyber-ice/20 to-cyber-navy',
   };
   return (
     <div className={cn(
-      "border-2 bg-black/80 flex flex-col overflow-hidden glow-border",
+      "border bg-black/40 flex flex-col overflow-hidden glow-border backdrop-blur-md animate-float",
       borderColors[headerColor],
       className
     )}>
       {title && (
         <div className={cn(
-          "px-4 py-1 border-b-2 font-bold uppercase tracking-widest text-sm flex justify-between items-center",
+          "px-4 py-2 border-b font-mono uppercase tracking-[0.2em] text-xs flex justify-between items-center bg-gradient-to-r",
           borderColors[headerColor],
-          textColors[headerColor]
+          headerGradients[headerColor]
         )}>
-          <span>{title}</span>
-          <div className="flex gap-1">
-            <div className={cn("w-2 h-2 rounded-full bg-current opacity-50")} />
-            <div className={cn("w-2 h-2 rounded-full bg-current opacity-50")} />
+          <span className="text-cyber-ice font-bold drop-shadow-[0_0_5px_rgba(0,212,255,0.5)]">{title}</span>
+          <div className="flex gap-1.5">
+            <div className="w-2 h-2 rounded-full bg-cyber-sapphire animate-pulse" />
+            <div className="w-2 h-2 rounded-full bg-cyber-neon shadow-[0_0_8px_rgba(0,212,255,0.8)]" />
           </div>
         </div>
       )}
-      <div className="flex-1 p-4 overflow-auto">
+      <div className="flex-1 p-4 overflow-auto scrollbar-thin scrollbar-thumb-cyber-sapphire">
         {children}
       </div>
+      <div className="h-0.5 w-full bg-gradient-to-r from-transparent via-cyber-neon/20 to-transparent" />
     </div>
   );
 }
