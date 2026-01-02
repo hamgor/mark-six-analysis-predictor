@@ -36,7 +36,7 @@ export function PredictionTerminal({ predictions, onRefresh }: PredictionTermina
             }`}
           >
             <div className="text-[10px] text-matrix-dim mb-2 uppercase tracking-[0.3em]">
-              VEC_COORD_0{idx + 1} >>
+              VEC_COORD_0{idx + 1}{' >>'}
             </div>
             <div className="grid grid-cols-6 gap-3">
               {set.map((num) => (

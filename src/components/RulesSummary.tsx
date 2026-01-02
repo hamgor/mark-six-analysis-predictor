@@ -45,7 +45,11 @@ export function RulesSummary({ stats, pairs, coverage }: RulesSummaryProps) {
         <div className="space-y-2">
           {pairs.map((p, idx) => (
             <div key={idx} className="flex justify-between items-center text-matrix-green/80 border-l-4 border-matrix-dim pl-3">
-              <span className="font-black">{p.pair[0].toString().padStart(2, '0')} <-> {p.pair[1].toString().padStart(2, '0')}</span>
+              <span className="font-black">
+                {p.pair[0].toString().padStart(2, '0')}
+                {' <-> '}
+                {p.pair[1].toString().padStart(2, '0')}
+              </span>
               <span className="text-[10px] bg-matrix-dim/20 px-1 font-bold">W:{p.count}</span>
             </div>
           ))}
