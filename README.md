@@ -1,6 +1,6 @@
 # Cloudflare Workers React Starter
 
-[cloudflarebutton]
+[![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hamgor/mark-six-analysis-predictor)
 
 A production-ready full-stack starter template for building scalable applications with Cloudflare Workers, Durable Objects, and React. This template provides a robust foundation with type-safe APIs, indexed entities for efficient data management, and a modern UI powered by Tailwind CSS and shadcn/ui.
 
@@ -114,7 +114,7 @@ curl -X POST http://localhost:8787/api/chats/c1/messages \
    - Custom domain via `wrangler.toml`.
 
 2. **One-Click Deploy**:
-   [cloudflarebutton]
+   [![Deploy to Cloudflare](https://deploy.workers.cloudflare.com/button)](https://deploy.workers.cloudflare.com/?url=https://github.com/hamgor/mark-six-analysis-predictor)
 
 3. **Production Config**:
    - Edit `wrangler.jsonc` for bindings/migrations.
