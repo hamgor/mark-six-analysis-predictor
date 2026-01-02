@@ -61,6 +61,8 @@ export function parseData(raw: string): Draw[] {
       };
     });
 }
+// Memoized archival data to prevent expensive re-parsing
+const ARCHIVAL_DRAW_CACHE: Draw[] = parseData(RAW_DATA);
 export function getCustomDraws(): Draw[] {
   const stored = localStorage.getItem(STORAGE_KEY);
   if (!stored) return [];
@@ -80,8 +82,7 @@ export function clearCustomDraws() {
   localStorage.removeItem(STORAGE_KEY);
 }
 export function getCombinedDraws(): Draw[] {
-  const archival = parseData(RAW_DATA);
   const custom = getCustomDraws();
-  // We prioritize custom draws by putting them at the front of the array (most recent)
-  return [...custom, ...archival];
+  // Using cached archival data
+  return [...custom, ...ARCHIVAL_DRAW_CACHE];
 }

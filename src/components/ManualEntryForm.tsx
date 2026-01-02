@@ -10,42 +10,62 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
   const [special, setSpecial] = useState<string>('');
   const [status, setStatus] = useState<'idle' | 'uplinking' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
+  const resetForm = () => {
+    setNums(['', '', '', '', '', '']);
+    setSpecial('');
+    setError(null);
+  };
   const handleUplink = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const parsedNums = nums.map(n => parseInt(n)).filter(n => !isNaN(n));
-    const parsedSpecial = parseInt(special);
+    const parsedNums = nums.map(n => parseInt(n, 10)).filter(n => !isNaN(n));
+    const parsedSpecial = parseInt(special, 10);
+    // Validation: Exactly 6 primary numbers required
     if (parsedNums.length < 6) {
       setError("PRIMARY_VECTORS_INCOMPLETE");
       return;
     }
-    const uniqueNums = new Set([...parsedNums, isNaN(parsedSpecial) ? -1 : parsedSpecial]);
-    if (uniqueNums.size !== (isNaN(parsedSpecial) ? 6 : 7)) {
-      setError("COLLISION_DETECTED: DUPLICATE_NODES");
-      return;
-    }
-    if (parsedNums.some(n => n < 1 || n > 49) || (!isNaN(parsedSpecial) && (parsedSpecial < 1 || parsedSpecial > 49))) {
+    // Range check: 1-49
+    if (parsedNums.some(n => n < 1 || n > 49)) {
       setError("OUT_OF_BOUNDS: RANGE_1_49");
       return;
     }
+    if (!isNaN(parsedSpecial) && (parsedSpecial < 1 || parsedSpecial > 49)) {
+      setError("SPECIAL_VECTOR_OUT_OF_BOUNDS: 1_49");
+      return;
+    }
+    // Uniqueness check: Handle optional special number correctly
+    const primarySet = new Set(parsedNums);
+    if (primarySet.size !== 6) {
+      setError("COLLISION_DETECTED: DUPLICATE_PRIMARY_NODES");
+      return;
+    }
+    if (!isNaN(parsedSpecial) && primarySet.has(parsedSpecial)) {
+      setError("COLLISION_DETECTED: SPECIAL_NODE_EXISTS_IN_PRIMARY");
+      return;
+    }
     setStatus('uplinking');
-    // Simulation delay
-    await new Promise(r => setTimeout(r, 1500));
-    const newDraw: Draw = {
-      id: `user-${Date.now()}`,
-      date: new Date().toISOString().split('T')[0],
-      numbers: parsedNums.sort((a, b) => a - b),
-      special: isNaN(parsedSpecial) ? undefined : parsedSpecial
-    };
-    saveCustomDraw(newDraw);
-    setStatus('success');
-    setNums(['', '', '', '', '', '']);
-    setSpecial('');
-    onSuccess();
-    setTimeout(() => setStatus('idle'), 3000);
+    try {
+      // Simulation delay for "uplink" feel
+      await new Promise(r => setTimeout(r, 1200));
+      const newDraw: Draw = {
+        id: `user-${Date.now()}`,
+        date: new Date().toISOString().split('T')[0],
+        numbers: [...parsedNums].sort((a, b) => a - b),
+        special: isNaN(parsedSpecial) ? undefined : parsedSpecial
+      };
+      saveCustomDraw(newDraw);
+      setStatus('success');
+      resetForm();
+      onSuccess();
+      setTimeout(() => setStatus('idle'), 3000);
+    } catch (err) {
+      setError("UPLINK_PROTOCOL_FAILURE");
+      setStatus('error');
+    }
   };
   const handleClear = () => {
-    if (confirm("WIPE_LOCAL_DATA_ARCHIVE?")) {
+    if (confirm("WIPE_LOCAL_DATA_ARCHIVE? THIS ACTION IS IRREVERSIBLE.")) {
       clearCustomDraws();
       onSuccess();
     }
@@ -101,7 +121,7 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
         </div>
       </form>
       {error && (
-        <div className="flex items-center gap-2 text-[10px] text-red-400 bg-red-400/5 p-2 border border-red-400/20">
+        <div className="flex items-center gap-2 text-[10px] text-red-400 bg-red-400/5 p-2 border border-red-400/20 animate-pulse">
           <AlertCircle size={12} />
           <span>{error}</span>
         </div>
@@ -114,9 +134,9 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
       )}
       <button
         onClick={handleClear}
-        className="w-full py-1 text-[8px] uppercase tracking-[0.3em] text-cyber-ice/20 hover:text-red-400 transition-colors flex items-center justify-center gap-2"
+        className="w-full py-1 text-[8px] uppercase tracking-[0.3em] text-cyber-ice/20 hover:text-red-400 transition-colors flex items-center justify-center gap-2 group"
       >
-        <Trash2 size={10} />
+        <Trash2 size={10} className="opacity-50 group-hover:opacity-100" />
         [ERASE_USER_VECTORS]
       </button>
     </div>

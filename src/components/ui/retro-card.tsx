@@ -5,12 +5,14 @@ interface RetroCardProps {
   children: React.ReactNode;
   className?: string;
   headerColor?: 'neon' | 'sapphire' | 'ice';
+  animate?: boolean;
 }
 export function RetroCard({
   title,
   children,
   className,
-  headerColor = 'neon'
+  headerColor = 'neon',
+  animate = true
 }: RetroCardProps) {
   const borderColors = {
     neon: 'border-cyber-neon/40',
@@ -24,8 +26,10 @@ export function RetroCard({
   };
   return (
     <div className={cn(
-      "flex flex-col overflow-hidden glow-border holographic animate-float",
+      "flex flex-col overflow-hidden holographic",
+      animate && "animate-float",
       borderColors[headerColor],
+      "shadow-[0_0_15px_rgba(0,212,255,0.1)]",
       className
     )}>
       {title && (
