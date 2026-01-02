@@ -1,67 +1,56 @@
-import React from 'react';
-import { RefreshCw, LayoutGrid } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useEffect } from 'react';
+import { Terminal } from 'lucide-react';
 interface PredictionTerminalProps {
   predictions: number[][];
   onRefresh: () => void;
 }
 export function PredictionTerminal({ predictions, onRefresh }: PredictionTerminalProps) {
+  const [visibleSets, setVisibleSets] = useState<number>(0);
+  useEffect(() => {
+    setVisibleSets(0);
+    const interval = setInterval(() => {
+      setVisibleSets(prev => (prev < predictions.length ? prev + 1 : prev));
+    }, 800);
+    return () => clearInterval(interval);
+  }, [predictions]);
   return (
-    <div className="flex flex-col h-full gap-8">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2 text-cf-gray-900 font-semibold">
-          <LayoutGrid className="text-cf-orange w-5 h-5" />
-          <span>Optimal Vector Candidates</span>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <div className="flex items-center gap-2 text-retro-pink">
+          <Terminal size={18} />
+          <span className="animate-pulse">RUNNING_SIMULATION_V4.2</span>
         </div>
-        <button
+        <button 
           onClick={onRefresh}
-          className="inline-flex items-center gap-2 bg-white border border-border px-4 py-2 rounded-md text-sm font-semibold text-cf-gray-700 hover:border-cf-orange hover:text-cf-orange transition-all shadow-sm active:scale-95"
+          className="text-xs border border-retro-green px-2 py-1 hover:bg-retro-green hover:text-black transition-colors"
         >
-          <RefreshCw className="w-4 h-4" />
-          Regenerate Sets
+          [RE-CALCULATE]
         </button>
       </div>
-      <div className="grid gap-6">
-        <AnimatePresence mode="popLayout" initial={false}>
-          {predictions.map((set, idx) => (
-            <motion.div
-              key={`prediction-set-${idx}-${set.join('-')}`}
-              layout
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ 
-                delay: idx * 0.05, 
-                duration: 0.3,
-                layout: { type: "spring", stiffness: 300, damping: 30 }
-              }}
-              className="bg-cf-gray-50/50 p-6 rounded-xl border border-border/50 group hover:bg-white hover:border-cf-orange/30 transition-all shadow-sm"
-            >
-              <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-4 flex items-center justify-between">
-                <span>Optimized Set #{idx + 1}</span>
-                <span className="text-cf-blue opacity-0 group-hover:opacity-100 transition-opacity font-mono">
-                  {(75 + Math.random() * 5).toFixed(1)}% Score
-                </span>
-              </div>
-              <div className="flex flex-wrap gap-4">
-                {set.map((num) => (
-                  <motion.div
-                    key={`${idx}-${num}`}
-                    layout
-                    className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white border-2 border-border flex items-center justify-center shadow-sm group-hover:border-cf-orange/50 transition-colors"
-                  >
-                    <span className="text-xl md:text-2xl font-bold text-cf-gray-900">
-                      {num.toString().padStart(2, '0')}
-                    </span>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
+      <div className="space-y-4">
+        {predictions.map((set, idx) => (
+          <div 
+            key={idx}
+            className={`transition-all duration-500 transform ${idx < visibleSets ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-4'}`}
+          >
+            <div className="text-[10px] opacity-50 mb-1">PROBABILITY_SET_0{idx + 1}</div>
+            <div className="flex gap-2">
+              {set.map((num) => (
+                <div 
+                  key={num}
+                  className="w-10 h-10 border-2 border-retro-pink flex items-center justify-center text-lg font-bold glow-text bg-retro-pink/5"
+                >
+                  {num.toString().padStart(2, '0')}
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-      <div className="mt-auto pt-6 border-t border-dashed text-xs text-muted-foreground leading-relaxed italic">
-        * Statistical models based on time-weighted frequency decay. These figures represent probabilistic hotspots and do not guarantee future performance.
+      <div className="mt-8 text-[10px] opacity-40 leading-tight">
+        * STATISTICAL PROBABILITY ENGINE ACTIVE. <br />
+        * WEIGHTING APPLIED: 1.1x COMPOUND PER 5 DRAW BATCHES. <br />
+        * ALL PREDICTIONS ARE BASED ON HISTORICAL FREQUENCY ANALYSIS.
       </div>
     </div>
   );

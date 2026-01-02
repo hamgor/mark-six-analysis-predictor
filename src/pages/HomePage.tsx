@@ -1,138 +1,121 @@
-// Home page of the app.
-// Currently a demo placeholder "please wait" screen.
-// Replace this file with your actual app UI. Do not delete it to use some other file as homepage. Simply replace the entire contents of this file.
-
-import { useEffect, useMemo, useState } from 'react'
-import { Sparkles } from 'lucide-react'
-
-import { ThemeToggle } from '@/components/ThemeToggle'
-import { HAS_TEMPLATE_DEMO, TemplateDemo } from '@/components/TemplateDemo'
-import { Button } from '@/components/ui/button'
-import { Toaster, toast } from '@/components/ui/sonner'
-
-function formatDuration(ms: number): string {
-  const total = Math.max(0, Math.floor(ms / 1000))
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  return `${m}:${s.toString().padStart(2, '0')}`
-}
-
+import React, { useState, useMemo } from 'react';
+import { RAW_DATA, parseData } from '@/lib/data';
+import { MarkSixAnalyzer } from '@/lib/analyzer';
+import { RetroCard } from '@/components/ui/retro-card';
+import { DrawHistory } from '@/components/DrawHistory';
+import { AnalysisCharts } from '@/components/AnalysisCharts';
+import { PredictionTerminal } from '@/components/PredictionTerminal';
+import { Activity, Database, Cpu, Zap } from 'lucide-react';
 export function HomePage() {
-  const [coins, setCoins] = useState(0)
-  const [isRunning, setIsRunning] = useState(false)
-  const [startedAt, setStartedAt] = useState<number | null>(null)
-  const [elapsedMs, setElapsedMs] = useState(0)
-
-  useEffect(() => {
-    if (!isRunning || startedAt === null) return
-
-    const t = setInterval(() => {
-      setElapsedMs(Date.now() - startedAt)
-    }, 250)
-
-    return () => clearInterval(t)
-  }, [isRunning, startedAt])
-
-  const formatted = useMemo(() => formatDuration(elapsedMs), [elapsedMs])
-
-  const onPleaseWait = () => {
-    setCoins((c) => c + 1)
-
-    if (!isRunning) {
-      // Resume from the current elapsed time
-      setStartedAt(Date.now() - elapsedMs)
-      setIsRunning(true)
-      toast.success('Building your app…', {
-        description: "Hang tight — we're setting everything up.",
-      })
-      return
-    }
-
-    setIsRunning(false)
-    toast.info('Still working…', {
-      description: 'You can come back in a moment.',
-    })
-  }
-
-  const onReset = () => {
-    setCoins(0)
-    setIsRunning(false)
-    setStartedAt(null)
-    setElapsedMs(0)
-    toast('Reset complete')
-  }
-
-  const onAddCoin = () => {
-    setCoins((c) => c + 1)
-    toast('Coin added')
-  }
-
+  const [iteration, setIteration] = useState(0);
+  const draws = useMemo(() => parseData(RAW_DATA), []);
+  const analyzer = useMemo(() => new MarkSixAnalyzer(draws), [draws]);
+  const weightedFrequencies = useMemo(() => analyzer.getWeightedFrequencies(), [analyzer]);
+  const predictions = useMemo(() => {
+    // We use iteration to trigger re-generation if needed
+    void iteration;
+    return analyzer.generatePredictions(3);
+  }, [analyzer, iteration]);
+  const handleRefresh = () => {
+    setIteration(prev => prev + 1);
+  };
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background text-foreground p-4 overflow-hidden relative">
-      <ThemeToggle />
-      <div className="absolute inset-0 bg-gradient-rainbow opacity-10 dark:opacity-20 pointer-events-none" />
-
-      <div className="text-center space-y-8 relative z-10 animate-fade-in w-full">
-        <div className="flex justify-center">
-          <div className="w-16 h-16 rounded-2xl bg-gradient-primary flex items-center justify-center shadow-primary floating">
-            <Sparkles className="w-8 h-8 text-white rotating" />
+    <div className="relative min-h-screen">
+      {/* Visual Overlays */}
+      <div className="crt-overlay" />
+      <div className="scanline" />
+      {/* Header Marquee */}
+      <header className="bg-retro-green/10 border-b border-retro-green p-2 relative z-10">
+        <div className="max-w-7xl mx-auto flex justify-between items-center text-xs tracking-[0.2em] font-bold">
+          <div className="flex items-center gap-4">
+            <span className="flex items-center gap-1 text-retro-cyan">
+              <Activity size={14} /> SYSTEM_STATUS: ONLINE
+            </span>
+            <span className="hidden md:inline opacity-50">LOCATION: HK_MARK_SIX_NODE</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Zap size={14} className="animate-pulse text-retro-pink" />
+            <span>CORE_TEMP: 32.4°C</span>
           </div>
         </div>
-
-        <div className="space-y-3">
-          <h1 className="text-5xl md:text-7xl font-display font-bold text-balance leading-tight">
-            Creating your <span className="text-gradient">app</span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-xl mx-auto text-pretty">
-            Your application would be ready soon.
-          </p>
-        </div>
-
-        {HAS_TEMPLATE_DEMO ? (
-          <div className="max-w-5xl mx-auto text-left">
-            <TemplateDemo />
+      </header>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8 lg:py-10 relative z-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          {/* Left Column: Data Log */}
+          <div className="lg:col-span-4 flex flex-col gap-6">
+            <RetroCard 
+              title="HISTORICAL_ARCHIVE" 
+              className="h-[400px] lg:h-[600px]"
+              headerColor="green"
+            >
+              <div className="flex items-center gap-2 mb-4 text-xs opacity-60">
+                <Database size={12} />
+                <span>TOTAL_ENTRIES: {draws.length}</span>
+              </div>
+              <DrawHistory draws={draws} />
+            </RetroCard>
+            <RetroCard title="SYS_LOG" className="h-[150px]" headerColor="cyan">
+              <div className="text-[10px] space-y-1 opacity-70">
+                <p>&gt; BOOTING ANALYZER_V4.2...</p>
+                <p>&gt; PARSING HISTORICAL_DATA_BUFFER...</p>
+                <p>&gt; APPLYING TIME_DECAY_WEIGHTS (1.1x)...</p>
+                <p className="text-retro-cyan">&gt; HEURISTIC ENGINE READY.</p>
+              </div>
+            </RetroCard>
           </div>
-        ) : (
-          <>
-            <div className="flex justify-center gap-4">
-              <Button
-                size="lg"
-                onClick={onPleaseWait}
-                className="btn-gradient px-8 py-4 text-lg font-semibold hover:-translate-y-0.5 transition-all duration-200"
-                aria-live="polite"
+          {/* Center/Right: Analysis and Predictions */}
+          <div className="lg:col-span-8 flex flex-col gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <RetroCard 
+                title="PREDICTION_ENGINE" 
+                className="h-[450px]" 
+                headerColor="pink"
               >
-                Please Wait
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-              <div>
-                Time elapsed:{' '}
-                <span className="font-medium tabular-nums text-foreground">{formatted}</span>
+                <PredictionTerminal 
+                  predictions={predictions} 
+                  onRefresh={handleRefresh} 
+                />
+              </RetroCard>
+              <div className="flex flex-col gap-6">
+                <RetroCard title="HOTSPOT_DISTRIBUTION" headerColor="green">
+                  <div className="flex items-center gap-2 mb-4 text-xs">
+                    <Cpu size={12} className="text-retro-green" />
+                    <span>WEIGHTED_FREQUENCY_ANALYSIS</span>
+                  </div>
+                  <AnalysisCharts weightedFrequencies={weightedFrequencies} />
+                </RetroCard>
+                <RetroCard title="STATISTICAL_RULES" headerColor="cyan">
+                  <div className="text-xs space-y-3">
+                    <div className="flex justify-between items-center">
+                      <span className="opacity-60">RULE_ID: 01</span>
+                      <span className="text-retro-cyan">TIME_WEIGHTING</span>
+                    </div>
+                    <p className="leading-relaxed">
+                      Latest draws have a <span className="text-white">10% compounded weight</span> increase every 5 entries. Modern patterns prioritize current trends over legacy data.
+                    </p>
+                    <div className="border-t border-retro-cyan/20 pt-2">
+                      <div className="flex justify-between items-center mb-1">
+                        <span className="opacity-60">RULE_ID: 02</span>
+                        <span className="text-retro-pink">HOTSPOT_FOCUS</span>
+                      </div>
+                      <p className="leading-relaxed">
+                        Predictions are constrained to the <span className="text-white">top 18 weighted numbers</span> (Hotspots).
+                      </p>
+                    </div>
+                  </div>
+                </RetroCard>
               </div>
-              <div>
-                Coins:{' '}
-                <span className="font-medium tabular-nums text-foreground">{coins}</span>
+            </div>
+            <RetroCard className="py-2 px-4" headerColor="green">
+              <div className="flex justify-between items-center text-[10px] opacity-40 uppercase tracking-tighter">
+                <span>RETROSIX_ANALYST // BUILD 8429</span>
+                <span>ENC: AES-256-BIT</span>
+                <span>(C) 1994 CYBER-CORE SYSTEMS</span>
               </div>
-            </div>
-
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" size="sm" onClick={onReset}>
-                Reset
-              </Button>
-              <Button variant="outline" size="sm" onClick={onAddCoin}>
-                Add Coin
-              </Button>
-            </div>
-          </>
-        )}
-      </div>
-
-      <footer className="absolute bottom-8 text-center text-muted-foreground/80">
-        <p>Powered by Cloudflare</p>
-      </footer>
-
-      <Toaster richColors closeButton />
+            </RetroCard>
+          </div>
+        </div>
+      </main>
     </div>
-  )
+  );
 }

@@ -4,32 +4,44 @@ interface RetroCardProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
-  animate?: boolean;
+  headerColor?: 'green' | 'pink' | 'cyan';
 }
-export function RetroCard({
-  title,
-  children,
-  className,
+export function RetroCard({ 
+  title, 
+  children, 
+  className, 
+  headerColor = 'green' 
 }: RetroCardProps) {
+  const borderColors = {
+    green: 'border-retro-green',
+    pink: 'border-retro-pink',
+    cyan: 'border-retro-cyan',
+  };
+  const textColors = {
+    green: 'text-retro-green',
+    pink: 'text-retro-pink',
+    cyan: 'text-retro-cyan',
+  };
   return (
     <div className={cn(
-      "group relative flex flex-col overflow-hidden bg-card border border-border rounded-lg",
-      "shadow-sm transition-all duration-200 hover:shadow-md",
-      "before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-cf-orange before:opacity-0 hover:before:opacity-100 before:transition-opacity",
+      "border-2 bg-black/80 flex flex-col overflow-hidden glow-border",
+      borderColors[headerColor],
       className
     )}>
       {title && (
-        <div className="px-6 py-4 border-b border-border bg-cf-gray-50/50 flex justify-between items-center">
-          <span className="text-cf-gray-900 font-semibold text-sm tracking-tight">
-            {title}
-          </span>
-          <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
-            <div className="w-1.5 h-1.5 rounded-full bg-cf-orange/40" />
-            <div className="w-1.5 h-1.5 rounded-full bg-cf-orange/20" />
+        <div className={cn(
+          "px-4 py-1 border-b-2 font-bold uppercase tracking-widest text-sm flex justify-between items-center",
+          borderColors[headerColor],
+          textColors[headerColor]
+        )}>
+          <span>{title}</span>
+          <div className="flex gap-1">
+            <div className={cn("w-2 h-2 rounded-full bg-current opacity-50")} />
+            <div className={cn("w-2 h-2 rounded-full bg-current opacity-50")} />
           </div>
         </div>
       )}
-      <div className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 p-4 overflow-auto">
         {children}
       </div>
     </div>

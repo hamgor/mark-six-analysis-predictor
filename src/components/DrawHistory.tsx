@@ -1,54 +1,32 @@
 import React from 'react';
 import { Draw } from '@/lib/data';
-import { Badge } from '@/components/ui/badge';
 interface DrawHistoryProps {
   draws: Draw[];
 }
 export function DrawHistory({ draws }: DrawHistoryProps) {
   return (
-    <div className="w-full">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs uppercase text-muted-foreground font-semibold border-b bg-cf-gray-50/50">
-            <tr>
-              <th className="px-2 py-3">Date</th>
-              <th className="px-2 py-3 text-center">Numbers</th>
-              <th className="px-2 py-3 text-right">Ext</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/50">
-            {draws.map((draw) => (
-              <tr key={draw.id} className="hover:bg-cf-gray-50 transition-colors">
-                <td className="px-2 py-3 font-medium text-cf-gray-700">
-                  {new Date(draw.date).toLocaleDateString(undefined, { 
-                    month: 'short', 
-                    day: 'numeric',
-                    year: 'numeric' 
-                  })}
-                </td>
-                <td className="px-2 py-3">
-                  <div className="flex justify-center gap-1.5">
-                    {draw.numbers.map((n) => (
-                      <span key={n} className="w-6 text-center font-bold text-cf-gray-900">
-                        {n}
-                      </span>
-                    ))}
-                  </div>
-                </td>
-                <td className="px-2 py-3 text-right">
-                  {draw.special !== undefined ? (
-                    <Badge variant="outline" className="bg-cf-orange/10 text-cf-orange border-cf-orange/20 font-bold">
-                      {draw.special}
-                    </Badge>
-                  ) : (
-                    <span className="text-muted-foreground/30">—</span>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+    <div className="space-y-2 text-xs md:text-sm">
+      <div className="grid grid-cols-4 gap-2 border-b border-retro-green/30 pb-1 font-bold opacity-70">
+        <span>DRAW_ID</span>
+        <span>DATE_STAMP</span>
+        <span className="col-span-2">NUM_SEQUENCE</span>
       </div>
+      {draws.map((draw) => (
+        <div 
+          key={draw.id} 
+          className="grid grid-cols-4 gap-2 hover:bg-retro-green/10 transition-colors py-1 group"
+        >
+          <span className="text-retro-cyan">#{draw.id.split('-')[1].padStart(3, '0')}</span>
+          <span className="opacity-80">{draw.date}</span>
+          <div className="col-span-2 flex gap-2">
+            {draw.numbers.map((n) => (
+              <span key={n} className="group-hover:text-white transition-colors">
+                {n.toString().padStart(2, '0')}
+              </span>
+            ))}
+          </div>
+        </div>
+      ))}
     </div>
   );
 }
