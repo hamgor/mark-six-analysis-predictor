@@ -4,40 +4,32 @@ interface RetroCardProps {
   title?: string;
   children: React.ReactNode;
   className?: string;
-  headerColor?: 'neon' | 'sapphire' | 'ice'; // Kept for API compatibility, mapped to green intensities
   animate?: boolean;
 }
 export function RetroCard({
   title,
   children,
   className,
-  headerColor = 'neon',
-  animate = true
 }: RetroCardProps) {
   return (
     <div className={cn(
-      "flex flex-col overflow-hidden bg-matrix-dark/80 border-[4px] border-matrix-dim relative",
-      "shadow-[0_0_20px_rgba(0,59,0,0.5)]",
-      animate && "animate-phosphor-flicker",
+      "group relative flex flex-col overflow-hidden bg-card border border-border rounded-lg",
+      "shadow-sm transition-all duration-200 hover:shadow-md",
+      "before:absolute before:top-0 before:left-0 before:w-full before:h-1 before:bg-cf-orange before:opacity-0 hover:before:opacity-100 before:transition-opacity",
       className
     )}>
-      {/* Corner "Screws" */}
-      <div className="absolute top-1 left-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
-      <div className="absolute top-1 right-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
-      <div className="absolute bottom-1 left-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
-      <div className="absolute bottom-1 right-1 w-1 h-1 rounded-full bg-matrix-dim/40" />
       {title && (
-        <div className="px-4 py-2 border-b-[4px] border-matrix-dim bg-matrix-dim/20 flex justify-between items-center">
-          <span className="text-matrix-green font-mono font-black uppercase tracking-[0.2em] text-xs glow-text">
-            [ {title} ]
+        <div className="px-6 py-4 border-b border-border bg-cf-gray-50/50 flex justify-between items-center">
+          <span className="text-cf-gray-900 font-semibold text-sm tracking-tight">
+            {title}
           </span>
-          <div className="flex gap-1.5">
-            <div className="w-2 h-2 bg-matrix-green animate-pulse shadow-[0_0_5px_#00FF41]" />
-            <div className="w-2 h-2 bg-matrix-dark border border-matrix-dim" />
+          <div className="flex gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="w-1.5 h-1.5 rounded-full bg-cf-orange/40" />
+            <div className="w-1.5 h-1.5 rounded-full bg-cf-orange/20" />
           </div>
         </div>
       )}
-      <div className="flex-1 p-6 overflow-auto industrial-inset bg-black/40">
+      <div className="flex-1 p-6 overflow-auto">
         {children}
       </div>
     </div>

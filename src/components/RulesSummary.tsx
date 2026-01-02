@@ -1,6 +1,7 @@
 import React from 'react';
-import { Activity, Zap, Cpu, Scan } from 'lucide-react';
+import { TrendingUp, TrendingDown, Users, Target } from 'lucide-react';
 import { HotColdStats, PairStats } from '@/lib/analyzer';
+import { Badge } from '@/components/ui/badge';
 interface RulesSummaryProps {
   stats: HotColdStats;
   pairs: PairStats[];
@@ -8,60 +9,62 @@ interface RulesSummaryProps {
 }
 export function RulesSummary({ stats, pairs, coverage }: RulesSummaryProps) {
   return (
-    <div className="space-y-6 font-mono text-[11px] leading-relaxed">
+    <div className="space-y-6 text-sm">
       <div>
-        <div className="flex items-center gap-2 text-matrix-green font-black tracking-widest mb-3 uppercase">
-          <Zap size={16} />
-          <span>H_ZONE_ANALYSIS</span>
+        <div className="flex items-center gap-2 text-cf-gray-900 font-bold mb-3">
+          <TrendingUp size={16} className="text-cf-orange" />
+          <span>Trending High (Hot)</span>
         </div>
         <div className="flex flex-wrap gap-2">
           {stats.hot.map(s => (
-            <span key={s.number} className="px-3 py-1 border-2 border-matrix-green bg-matrix-green/10 text-matrix-green font-black">
+            <Badge key={s.number} className="bg-cf-orange/10 text-cf-orange border-cf-orange/20 hover:bg-cf-orange hover:text-white transition-colors">
               {s.number.toString().padStart(2, '0')}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>
-      <div className="border-t-2 border-matrix-dim/20" />
+      <div className="border-t border-border" />
       <div>
-        <div className="flex items-center gap-2 text-matrix-dim font-black tracking-widest mb-3 uppercase">
-          <Cpu size={16} />
-          <span>C_ZONE_LOGIC</span>
+        <div className="flex items-center gap-2 text-cf-gray-900 font-bold mb-3">
+          <TrendingDown size={16} className="text-cf-blue" />
+          <span>Dormant Values (Cold)</span>
         </div>
-        <div className="flex flex-wrap gap-2 opacity-60">
+        <div className="flex flex-wrap gap-2">
           {stats.cold.map(s => (
-            <span key={s.number} className="px-3 py-1 border-2 border-matrix-dim text-matrix-dim">
+            <Badge key={s.number} variant="outline" className="text-muted-foreground bg-slate-50 border-slate-200">
               {s.number.toString().padStart(2, '0')}
-            </span>
+            </Badge>
           ))}
         </div>
       </div>
-      <div className="border-t-2 border-matrix-dim/20" />
+      <div className="border-t border-border" />
       <div>
-        <div className="flex items-center gap-2 text-matrix-green font-black tracking-widest mb-3 uppercase">
-          <Scan size={16} />
-          <span>PAIR_CO_VECTORS</span>
+        <div className="flex items-center gap-2 text-cf-gray-900 font-bold mb-3">
+          <Users size={16} className="text-cf-blue" />
+          <span>Frequent Co-Occurrences</span>
         </div>
-        <div className="space-y-2">
+        <div className="grid gap-2">
           {pairs.map((p, idx) => (
-            <div key={idx} className="flex justify-between items-center text-matrix-green/80 border-l-4 border-matrix-dim pl-3">
-              <span className="font-black">
+            <div key={idx} className="flex justify-between items-center bg-slate-50/50 p-2 rounded-md border border-slate-100">
+              <span className="font-bold text-cf-gray-700">
                 {p.pair[0].toString().padStart(2, '0')}
-                {' <-> '}
+                <span className="mx-2 text-muted-foreground/50">↔</span>
                 {p.pair[1].toString().padStart(2, '0')}
               </span>
-              <span className="text-[10px] bg-matrix-dim/20 px-1 font-bold">W:{p.count}</span>
+              <Badge variant="secondary" className="text-[10px] font-bold">
+                {p.count} Hits
+              </Badge>
             </div>
           ))}
         </div>
       </div>
-      <div className="border-t-2 border-matrix-dim/20" />
+      <div className="border-t border-border" />
       <div>
-        <div className="flex items-center gap-2 text-matrix-green font-black tracking-widest mb-3 uppercase">
-          <Activity size={16} />
-          <span>75PCT_POOL_SNAPSHOT</span>
+        <div className="flex items-center gap-2 text-cf-gray-900 font-bold mb-3">
+          <Target size={16} className="text-cf-orange" />
+          <span>75% Probability Coverage</span>
         </div>
-        <div className="text-matrix-dim/80 text-[10px] break-all tracking-widest bg-black/40 p-2 border border-matrix-dim/30">
+        <div className="bg-cf-gray-50/50 p-3 rounded-md border border-border text-[11px] font-mono leading-relaxed text-muted-foreground break-all">
           {coverage.map(n => n.toString().padStart(2, '0')).join(' ')}
         </div>
       </div>

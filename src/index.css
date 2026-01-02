@@ -1,105 +1,71 @@
-@import url('https://fonts.googleapis.com/css2?family=VT323&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap');
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 @layer base {
   :root {
-    --background: 120 100% 2%;
-    --foreground: 120 100% 50%;
-    --primary: 120 100% 50%;
-    --primary-foreground: 120 100% 2%;
-    --card: 120 100% 5%;
-    --card-foreground: 120 100% 50%;
-    --border: 120 100% 28%;
-    --radius: 0px;
+    --background: 210 20% 98%;
+    --foreground: 222 47% 11%;
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+    --primary: 25 90% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 40% 96%;
+    --secondary-foreground: 222 47% 11%;
+    --muted: 210 40% 96.1%;
+    --muted-foreground: 215.4 16.3% 46.9%;
+    --accent: 210 40% 96.1%;
+    --accent-foreground: 222 47% 11%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 25 90% 54%;
+    --radius: 0.5rem;
   }
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 25 90% 54%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 25 90% 54%;
+  }
+}
+@layer base {
   * {
-    @apply cursor-[crosshair];
+    @apply border-border;
   }
   body {
-    @apply bg-console-bg text-matrix-green font-mono overflow-x-hidden antialiased;
+    @apply bg-background text-foreground font-sans antialiased;
     background-image: 
-      linear-gradient(rgba(0, 255, 65, 0.05) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0, 255, 65, 0.05) 1px, transparent 1px);
-    background-size: 20px 20px;
-    image-rendering: pixelated;
+      radial-gradient(at 0% 0%, hsla(25, 90%, 54%, 0.05) 0, transparent 50%), 
+      radial-gradient(at 50% 0%, hsla(210, 100%, 50%, 0.03) 0, transparent 50%);
   }
 }
-.crt-container {
-  perspective: 1000px;
-  overflow: hidden;
-  background: #000;
-  min-height: 100vh;
-}
-.crt-screen {
-  transform: rotateX(2deg) rotateY(0deg) scale(1.02);
-  position: relative;
-  background: #0D0208;
-}
-.crt-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    rgba(0, 0, 0, 0.4) 100%
-  );
-  pointer-events: none;
-  z-index: 999;
-}
-.scanline {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(
-    rgba(18, 16, 16, 0) 50%,
-    rgba(0, 0, 0, 0.1) 50%
-  ),
-  linear-gradient(
-    90deg,
-    rgba(255, 0, 0, 0.01),
-    rgba(0, 255, 0, 0.01),
-    rgba(0, 0, 255, 0.01)
-  );
-  z-index: 1000;
-  background-size: 100% 3px, 3px 100%;
-  pointer-events: none;
-  opacity: 0.6;
-}
-.glow-text {
-  text-shadow: 0 0 8px rgba(0, 255, 65, 0.6);
-}
-.industrial-inset {
-  box-shadow: inset 0 0 20px rgba(0, 59, 0, 0.8), 0 0 10px rgba(0, 255, 65, 0.1);
-}
-.matrix-rain {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  opacity: 0.03;
-  pointer-events: none;
-  background: repeating-linear-gradient(0deg, #00FF41, #00FF41 1px, transparent 1px, transparent 20px);
-  background-size: 100% 20px;
-  animation: matrix-scroll 30s linear infinite;
-  z-index: 0;
-}
+/* Modern Subtle Scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
+  width: 8px;
+  height: 8px;
 }
 ::-webkit-scrollbar-track {
-  background: #001A00;
+  @apply bg-transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #003B00;
-  border: 2px solid #00FF41;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #00FF41;
+  @apply bg-muted-foreground/20 rounded-full transition-colors hover:bg-muted-foreground/40;
 }

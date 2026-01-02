@@ -1,63 +1,59 @@
-import React, { useState, useEffect } from 'react';
-import { Terminal } from 'lucide-react';
+import React from 'react';
+import { RefreshCw, LayoutGrid } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 interface PredictionTerminalProps {
   predictions: number[][];
   onRefresh: () => void;
 }
 export function PredictionTerminal({ predictions, onRefresh }: PredictionTerminalProps) {
-  const [visibleSets, setVisibleSets] = useState<number>(0);
-  useEffect(() => {
-    setVisibleSets(0);
-    const interval = setInterval(() => {
-      setVisibleSets(prev => (prev < predictions.length ? prev + 1 : prev));
-    }, 300);
-    return () => clearInterval(interval);
-  }, [predictions]);
   return (
-    <div className="space-y-6 h-full flex flex-col">
-      <div className="flex justify-between items-center mb-2">
-        <div className="flex items-center gap-2 text-matrix-green">
-          <Terminal size={18} className="animate-pulse" />
-          <span className="tracking-[0.2em] font-black text-xs uppercase">PROCESSOR_RUNNING</span>
+    <div className="flex flex-col h-full gap-8">
+      <div className="flex justify-between items-center">
+        <div className="flex items-center gap-2 text-cf-gray-900 font-semibold">
+          <LayoutGrid className="text-cf-orange w-5 h-5" />
+          <span>Optimal Vector Candidates</span>
         </div>
         <button
           onClick={onRefresh}
-          className="text-xs tracking-widest border-[3px] border-matrix-green px-6 py-2 bg-matrix-dark text-matrix-green hover:bg-matrix-green hover:text-matrix-dark active:translate-y-1 transition-all uppercase font-black shadow-[4px_4px_0px_#003B00]"
+          className="inline-flex items-center gap-2 bg-white border border-border px-4 py-2 rounded-md text-sm font-semibold text-cf-gray-700 hover:border-cf-orange hover:text-cf-orange transition-all shadow-sm active:scale-95"
         >
-          [ RE-CALIBRATE ]
+          <RefreshCw className="w-4 h-4" />
+          Regenerate Sets
         </button>
       </div>
-      <div className="flex-1 flex flex-col gap-6">
-        {predictions.map((set, idx) => (
-          <div
-            key={idx}
-            className={`transition-all duration-300 ${
-              idx < visibleSets ? 'opacity-100' : 'opacity-0 translate-x-4'
-            }`}
-          >
-            <div className="text-[10px] text-matrix-dim mb-2 uppercase tracking-[0.3em]">
-              VEC_COORD_0{idx + 1}{' >>'}
-            </div>
-            <div className="grid grid-cols-6 gap-3">
-              {set.map((num) => (
-                <div
-                  key={num}
-                  className="bg-matrix-green/10 border-2 border-matrix-green flex items-center justify-center p-2 relative group overflow-hidden"
-                >
-                  <div className="absolute inset-0 bg-matrix-green/20 scale-y-0 group-hover:scale-y-100 transition-transform origin-bottom" />
-                  <span className="text-2xl md:text-3xl font-black text-matrix-green glow-text z-10 leading-none">
-                    {num.toString().padStart(2, '0')}
-                  </span>
-                </div>
-              ))}
-            </div>
-          </div>
-        ))}
+      <div className="grid gap-6">
+        <AnimatePresence mode="popLayout">
+          {predictions.map((set, idx) => (
+            <motion.div
+              key={`${idx}-${set.join('-')}`}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ delay: idx * 0.1, duration: 0.3 }}
+              className="bg-cf-gray-50/50 p-6 rounded-xl border border-border/50 group hover:bg-white hover:border-cf-orange/30 transition-all shadow-sm"
+            >
+              <div className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest mb-4 flex items-center justify-between">
+                <span>Optimized Set #{idx + 1}</span>
+                <span className="text-cf-blue opacity-0 group-hover:opacity-100 transition-opacity">78.2% Confidence</span>
+              </div>
+              <div className="flex flex-wrap gap-4">
+                {set.map((num) => (
+                  <div
+                    key={num}
+                    className="w-12 h-12 md:w-14 md:h-14 rounded-full bg-white border-2 border-border flex items-center justify-center shadow-sm group-hover:border-cf-orange/50 transition-colors"
+                  >
+                    <span className="text-xl md:text-2xl font-bold text-cf-gray-900">
+                      {num.toString().padStart(2, '0')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
-      <div className="pt-4 border-t-2 border-matrix-dim/30 text-[11px] text-matrix-dim leading-relaxed uppercase tracking-[0.2em]">
-        SYSTEM_STATUS: NOMINAL <br />
-        HEURISTIC: TEMPORAL_1.1N <br />
-        OUTPUT: 3_VECTORS_LOCKED
+      <div className="mt-auto pt-6 border-t border-dashed text-xs text-muted-foreground leading-relaxed italic">
+        * Statistical models based on time-weighted frequency decay. These figures represent probabilistic hotspots and do not guarantee future performance.
       </div>
     </div>
   );

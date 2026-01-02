@@ -1,36 +1,38 @@
 import React, { useState } from 'react';
-import { Power, ShieldAlert, CheckSquare, RotateCcw } from 'lucide-react';
+import { Save, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import { Draw, saveCustomDraw, clearCustomDraws } from '@/lib/data';
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 interface ManualEntryFormProps {
   onSuccess: () => void;
 }
 export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
   const [nums, setNums] = useState<string[]>(['', '', '', '', '', '']);
   const [special, setSpecial] = useState<string>('');
-  const [status, setStatus] = useState<'idle' | 'uplinking' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
   const resetForm = () => {
     setNums(['', '', '', '', '', '']);
     setSpecial('');
     setError(null);
   };
-  const handleUplink = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
     const parsedNums = nums.map(n => parseInt(n, 10)).filter(n => !isNaN(n));
     const parsedSpecial = parseInt(special, 10);
     if (parsedNums.length < 6) {
-      setError("ERR: INCOMPLETE_VECTORS");
+      setError("Please enter all 6 primary numbers");
       return;
     }
     if (parsedNums.some(n => n < 1 || n > 49)) {
-      setError("ERR: BOUNDS_VIOLATION");
+      setError("Numbers must be between 1 and 49");
       return;
     }
-    setStatus('uplinking');
+    setStatus('loading');
     try {
-      await new Promise(r => setTimeout(r, 1000));
+      await new Promise(r => setTimeout(r, 800));
       const newDraw: Draw = {
         id: `user-${Date.now()}`,
         date: new Date().toISOString().split('T')[0],
@@ -41,18 +43,18 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
       setStatus('success');
       resetForm();
       onSuccess();
-      setTimeout(() => setStatus('idle'), 3000);
+      setTimeout(() => setStatus('idle'), 2000);
     } catch (err) {
-      setError("ERR: TRANSMISSION_FAILED");
+      setError("Failed to save entry");
       setStatus('error');
     }
   };
   return (
-    <div className="space-y-6 font-mono">
-      <form onSubmit={handleUplink} className="space-y-6">
+    <div className="space-y-6">
+      <form onSubmit={handleSubmit} className="space-y-6">
         <div className="grid grid-cols-6 gap-2">
           {nums.map((v, i) => (
-            <input
+            <Input
               key={i}
               type="number"
               value={v}
@@ -61,54 +63,49 @@ export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
                 newNums[i] = e.target.value.slice(0, 2);
                 setNums(newNums);
               }}
-              className="bg-black border-2 border-matrix-dim text-center py-3 text-matrix-green focus:border-matrix-green focus:bg-matrix-green/10 focus:outline-none transition-all font-black text-lg"
-              placeholder="--"
+              className="text-center font-bold px-0 h-10 border-slate-200 focus-visible:ring-cf-orange"
+              placeholder="00"
             />
           ))}
         </div>
-        <div className="flex items-end gap-4">
-          <div className="w-1/3">
-            <label className="text-[10px] uppercase tracking-widest text-matrix-dim mb-2 block">EXT_BIT</label>
-            <input
+        <div className="flex gap-4 items-end">
+          <div className="flex-1">
+            <label className="text-xs font-semibold text-muted-foreground mb-1.5 block">Special (Optional)</label>
+            <Input
               type="number"
               value={special}
               onChange={(e) => setSpecial(e.target.value.slice(0, 2))}
-              className="w-full bg-black border-2 border-matrix-dim text-center py-3 text-matrix-green focus:border-matrix-green focus:outline-none font-black text-lg"
-              placeholder="--"
+              className="text-center font-bold h-10 border-slate-200 focus-visible:ring-cf-orange"
+              placeholder="00"
             />
           </div>
-          <button
-            type="submit"
-            disabled={status === 'uplinking'}
-            className={cn(
-              "flex-1 py-3 px-6 uppercase font-black text-sm transition-all border-[4px] shadow-[4px_4px_0px_#003B00] active:translate-y-1 active:shadow-none",
-              status === 'uplinking' 
-                ? "bg-matrix-dim/20 border-matrix-dim text-matrix-dim cursor-not-allowed" 
-                : "bg-matrix-dark border-matrix-green text-matrix-green hover:bg-matrix-green hover:text-black"
-            )}
+          <Button 
+            type="submit" 
+            disabled={status === 'loading'}
+            className="flex-[2] h-10 bg-cf-orange hover:bg-cf-orange/90 text-white font-bold"
           >
-            {status === 'uplinking' ? "COMM_SYNC..." : "[ EXEC_UPLOAD ]"}
-          </button>
+            {status === 'loading' ? "Saving..." : "Add Entry"}
+          </Button>
         </div>
       </form>
       {error && (
-        <div className="flex items-center gap-2 text-xs text-black bg-red-600 p-2 font-black uppercase animate-screen-shake">
-          <ShieldAlert size={16} />
-          <span>{error}</span>
+        <div className="flex items-center gap-2 text-xs bg-red-50 text-red-700 p-3 rounded-md border border-red-100">
+          <AlertCircle size={14} />
+          <span className="font-semibold">{error}</span>
         </div>
       )}
       {status === 'success' && (
-        <div className="flex items-center gap-2 text-xs text-black bg-matrix-green p-2 font-black uppercase">
-          <Power size={16} className="animate-pulse" />
-          <span>UPLOAD_COMPLETE</span>
+        <div className="flex items-center gap-2 text-xs bg-green-50 text-green-700 p-3 rounded-md border border-green-100">
+          <CheckCircle2 size={14} />
+          <span className="font-semibold">Entry recorded successfully</span>
         </div>
       )}
       <button
-        onClick={() => { if(confirm("CLEAR ALL DATA?")) { clearCustomDraws(); onSuccess(); } }}
-        className="w-full py-2 text-[10px] uppercase tracking-[0.3em] text-matrix-dim hover:text-red-500 transition-colors flex items-center justify-center gap-2"
+        onClick={() => { if(confirm("Permanently clear all local entries?")) { clearCustomDraws(); onSuccess(); } }}
+        className="w-full py-2 text-xs font-semibold text-muted-foreground hover:text-red-600 transition-colors flex items-center justify-center gap-2 group"
       >
-        <RotateCcw size={12} />
-        PURGE_LOCAL_RECORDS
+        <Trash2 size={12} className="group-hover:animate-pulse" />
+        Purge Local Data
       </button>
     </div>
   );

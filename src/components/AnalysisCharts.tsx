@@ -19,49 +19,55 @@ export function AnalysisCharts({ weightedFrequencies }: AnalysisChartsProps) {
       weight: parseFloat(freq.toFixed(2))
     }))
     .sort((a, b) => b.weight - a.weight)
-    .slice(0, 12);
+    .slice(0, 10);
   return (
     <div className="h-[250px] w-full">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-          <CartesianGrid strokeDasharray="2 2" stroke="#003B00" vertical={false} />
+          <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
           <XAxis
             dataKey="number"
-            stroke="#00FF41"
+            stroke="#94A3B8"
             fontSize={12}
-            tickLine={true}
-            axisLine={true}
-            tick={{ fill: '#00FF41', fontFamily: 'VT323' }}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: '#64748B', fontWeight: 500, fontFamily: 'Inter' }}
           />
           <YAxis
-            stroke="#00FF41"
+            stroke="#94A3B8"
             fontSize={10}
-            tickLine={true}
-            axisLine={true}
-            tick={{ fill: '#008F11', fontFamily: 'VT323' }}
+            tickLine={false}
+            axisLine={false}
+            tick={{ fill: '#94A3B8', fontFamily: 'Inter' }}
           />
           <Tooltip
+            cursor={{ fill: '#F8FAFC' }}
             contentStyle={{
-              backgroundColor: '#00FF41',
-              border: 'none',
-              borderRadius: '0px',
-              color: '#0D0208',
-              fontSize: '14px',
-              fontWeight: 'bold',
-              fontFamily: 'VT323',
+              backgroundColor: '#FFFFFF',
+              border: '1px solid #E2E8F0',
+              borderRadius: '8px',
+              boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)',
+              padding: '8px 12px',
             }}
-            itemStyle={{ color: '#0D0208' }}
-            cursor={{ fill: 'rgba(0, 255, 65, 0.1)' }}
+            itemStyle={{
+              color: '#F38020',
+              fontWeight: 700,
+              fontSize: '14px',
+              fontFamily: 'Inter',
+            }}
+            labelStyle={{
+              color: '#1E293B',
+              fontWeight: 600,
+              marginBottom: '4px',
+              fontFamily: 'Inter',
+            }}
           />
-          <Bar dataKey="weight">
+          <Bar dataKey="weight" radius={[4, 4, 0, 0]}>
             {data.map((entry, index) => (
               <Cell
                 key={`cell-${index}`}
-                fill={index < 3 ? '#00FF41' : '#003B00'}
-                stroke="#00FF41"
-                strokeWidth={1}
-                // Simulating segmented LED bars with a patterned fill would be ideal, 
-                // but simple solid colors work best for clarity in monochrome
+                fill={index < 3 ? '#F38020' : '#E2E8F0'}
+                className="transition-all duration-300 hover:fill-cf-blue"
               />
             ))}
           </Bar>
