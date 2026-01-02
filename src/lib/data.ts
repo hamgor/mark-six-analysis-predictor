@@ -1,8 +1,10 @@
 export interface Draw {
   id: string;
   numbers: number[];
+  special?: number;
   date: string;
 }
+export const STORAGE_KEY = 'retrosix_user_draws';
 export const RAW_DATA = `
 2024-05-10: 1, 12, 23, 34, 45, 49
 2024-05-08: 5, 15, 25, 35, 40, 42
@@ -54,7 +56,32 @@ export function parseData(raw: string): Draw[] {
       return {
         id: `draw-${index}`,
         date: datePart.trim(),
-        numbers: numbers.sort((a, b) => a - b),
+        numbers: numbers.slice(0, 6).sort((a, b) => a - b),
+        special: numbers[6] || undefined,
       };
     });
+}
+export function getCustomDraws(): Draw[] {
+  const stored = localStorage.getItem(STORAGE_KEY);
+  if (!stored) return [];
+  try {
+    return JSON.parse(stored);
+  } catch (e) {
+    console.error('Failed to parse custom draws', e);
+    return [];
+  }
+}
+export function saveCustomDraw(draw: Draw) {
+  const current = getCustomDraws();
+  const updated = [draw, ...current];
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+}
+export function clearCustomDraws() {
+  localStorage.removeItem(STORAGE_KEY);
+}
+export function getCombinedDraws(): Draw[] {
+  const archival = parseData(RAW_DATA);
+  const custom = getCustomDraws();
+  // We prioritize custom draws by putting them at the front of the array (most recent)
+  return [...custom, ...archival];
 }

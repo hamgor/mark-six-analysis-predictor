@@ -1,136 +1,123 @@
 import React, { useState } from 'react';
-import { Save, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
+import { Upload, AlertCircle, CheckCircle2, Trash2 } from 'lucide-react';
 import { Draw, saveCustomDraw, clearCustomDraws } from '@/lib/data';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 interface ManualEntryFormProps {
   onSuccess: () => void;
 }
 export function ManualEntryForm({ onSuccess }: ManualEntryFormProps) {
   const [nums, setNums] = useState<string[]>(['', '', '', '', '', '']);
   const [special, setSpecial] = useState<string>('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<'idle' | 'uplinking' | 'success' | 'error'>('idle');
   const [error, setError] = useState<string | null>(null);
-  const resetForm = () => {
-    setNums(['', '', '', '', '', '']);
-    setSpecial('');
-    setError(null);
-  };
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleUplink = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-    const parsedNums = nums.map(n => parseInt(n, 10)).filter(n => !isNaN(n));
-    const parsedSpecial = parseInt(special, 10);
+    const parsedNums = nums.map(n => parseInt(n)).filter(n => !isNaN(n));
+    const parsedSpecial = parseInt(special);
     if (parsedNums.length < 6) {
-      setError("Please enter all 6 primary numbers");
+      setError("PRIMARY_VECTORS_INCOMPLETE");
       return;
     }
-    if (parsedNums.some(n => n < 1 || n > 49)) {
-      setError("Numbers must be between 1 and 49");
+    const uniqueNums = new Set([...parsedNums, isNaN(parsedSpecial) ? -1 : parsedSpecial]);
+    if (uniqueNums.size !== (isNaN(parsedSpecial) ? 6 : 7)) {
+      setError("COLLISION_DETECTED: DUPLICATE_NODES");
       return;
     }
-    if (new Set(parsedNums).size !== parsedNums.length) {
-      setError("Duplicate primary numbers detected");
+    if (parsedNums.some(n => n < 1 || n > 49) || (!isNaN(parsedSpecial) && (parsedSpecial < 1 || parsedSpecial > 49))) {
+      setError("OUT_OF_BOUNDS: RANGE_1_49");
       return;
     }
-    if (!isNaN(parsedSpecial) && (parsedSpecial < 1 || parsedSpecial > 49)) {
-      setError("Special number must be between 1 and 49");
-      return;
-    }
-    setStatus('loading');
-    try {
-      // Simulate validation/processing delay
-      await new Promise(r => setTimeout(r, 600));
-      const newDraw: Draw = {
-        id: `user-${Date.now()}`,
-        date: new Date().toISOString().split('T')[0],
-        numbers: [...parsedNums].sort((a, b) => a - b),
-        special: isNaN(parsedSpecial) ? undefined : parsedSpecial
-      };
-      saveCustomDraw(newDraw);
-      setStatus('success');
-      resetForm();
-      onSuccess();
-      setTimeout(() => setStatus('idle'), 2500);
-    } catch (err) {
-      setError("Failed to save entry. Check system storage.");
-      setStatus('error');
-    }
+    setStatus('uplinking');
+    // Simulation delay
+    await new Promise(r => setTimeout(r, 1500));
+    const newDraw: Draw = {
+      id: `user-${Date.now()}`,
+      date: new Date().toISOString().split('T')[0],
+      numbers: parsedNums.sort((a, b) => a - b),
+      special: isNaN(parsedSpecial) ? undefined : parsedSpecial
+    };
+    saveCustomDraw(newDraw);
+    setStatus('success');
+    setNums(['', '', '', '', '', '']);
+    setSpecial('');
+    onSuccess();
+    setTimeout(() => setStatus('idle'), 3000);
   };
-  const handleNumChange = (index: number, value: string) => {
-    const val = value.slice(0, 2);
-    const newNums = [...nums];
-    newNums[index] = val;
-    setNums(newNums);
-    if (error) setError(null);
+  const handleClear = () => {
+    if (confirm("WIPE_LOCAL_DATA_ARCHIVE?")) {
+      clearCustomDraws();
+      onSuccess();
+    }
   };
   return (
-    <div className="space-y-6">
-      <form onSubmit={handleSubmit} className="space-y-6">
+    <div className="space-y-4 font-mono">
+      <form onSubmit={handleUplink} className="space-y-4">
         <div className="grid grid-cols-6 gap-2">
           {nums.map((v, i) => (
-            <Input
-              key={`input-num-${i}`}
+            <input
+              key={i}
               type="number"
-              min="1"
-              max="49"
               value={v}
-              onChange={(e) => handleNumChange(i, e.target.value)}
-              className="text-center font-bold px-0 h-10 border-slate-200 focus-visible:ring-cf-orange transition-all hover:border-cf-orange/30"
+              onChange={(e) => {
+                const newNums = [...nums];
+                newNums[i] = e.target.value.slice(0, 2);
+                setNums(newNums);
+              }}
               placeholder="00"
+              className="bg-cyber-navy/50 border border-cyber-sapphire/40 text-center py-2 text-cyber-ice focus:border-cyber-neon focus:outline-none transition-colors placeholder:text-cyber-ice/20"
             />
           ))}
         </div>
-        <div className="flex gap-4 items-end">
+        <div className="flex items-center gap-4">
           <div className="flex-1">
-            <label className="text-[10px] font-bold text-muted-foreground mb-1.5 block uppercase tracking-wider">Special (Opt)</label>
-            <Input
+            <label className="text-[9px] uppercase tracking-widest text-cyber-ice/40 mb-1 block">Special_Vector</label>
+            <input
               type="number"
-              min="1"
-              max="49"
               value={special}
               onChange={(e) => setSpecial(e.target.value.slice(0, 2))}
-              className="text-center font-bold h-10 border-slate-200 focus-visible:ring-cf-orange transition-all hover:border-cf-orange/30"
               placeholder="00"
+              className="w-full bg-cyber-navy/50 border border-cyber-accent/40 text-center py-2 text-cyber-ice focus:border-cyber-neon focus:outline-none transition-colors placeholder:text-cyber-ice/20"
             />
           </div>
-          <Button
+          <button
             type="submit"
-            disabled={status === 'loading'}
-            className="flex-[2] h-10 bg-cf-orange hover:bg-cf-orange/90 text-white font-bold shadow-sm active:scale-95 transition-transform"
-          >
-            {status === 'loading' ? (
-              <span className="flex items-center gap-2">
-                <Save className="w-4 h-4 animate-spin" /> Processing...
-              </span>
-            ) : (
-              "Add Entry"
+            disabled={status === 'uplinking'}
+            className={cn(
+              "flex-[2] mt-5 py-2 px-4 uppercase tracking-tighter font-bold text-xs transition-all duration-300 flex items-center justify-center gap-2",
+              status === 'uplinking' ? "bg-cyber-sapphire/20 text-cyber-ice/50 cursor-not-allowed" : "bg-cyber-neon/10 border border-cyber-neon/40 text-cyber-neon hover:bg-cyber-neon hover:text-cyber-navy"
             )}
-          </Button>
+          >
+            {status === 'uplinking' ? (
+              <div className="flex gap-1">
+                <div className="w-1 h-1 bg-cyber-neon animate-bounce" />
+                <div className="w-1 h-1 bg-cyber-neon animate-bounce [animation-delay:0.2s]" />
+                <div className="w-1 h-1 bg-cyber-neon animate-bounce [animation-delay:0.4s]" />
+              </div>
+            ) : (
+              <><Upload size={14} /> [UPLINK_DATA]</>
+            )}
+          </button>
         </div>
       </form>
-      <div className="min-h-[40px]">
-        {error && (
-          <div className="flex items-center gap-2 text-xs bg-red-50 text-red-700 p-3 rounded-md border border-red-100 animate-in fade-in slide-in-from-top-1">
-            <AlertCircle size={14} className="shrink-0" />
-            <span className="font-semibold">{error}</span>
-          </div>
-        )}
-        {status === 'success' && (
-          <div className="flex items-center gap-2 text-xs bg-green-50 text-green-700 p-3 rounded-md border border-green-100 animate-in fade-in slide-in-from-top-1">
-            <CheckCircle2 size={14} className="shrink-0" />
-            <span className="font-semibold">Entry recorded successfully</span>
-          </div>
-        )}
-      </div>
+      {error && (
+        <div className="flex items-center gap-2 text-[10px] text-red-400 bg-red-400/5 p-2 border border-red-400/20">
+          <AlertCircle size={12} />
+          <span>{error}</span>
+        </div>
+      )}
+      {status === 'success' && (
+        <div className="flex items-center gap-2 text-[10px] text-cyber-neon bg-cyber-neon/5 p-2 border border-cyber-neon/20 animate-glitch">
+          <CheckCircle2 size={12} />
+          <span>SYNCHRONIZATION_COMPLETE</span>
+        </div>
+      )}
       <button
-        type="button"
-        onClick={() => { if(confirm("Permanently clear all local entries?")) { clearCustomDraws(); onSuccess(); } }}
-        className="w-full py-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground hover:text-red-600 transition-colors flex items-center justify-center gap-2 group opacity-60 hover:opacity-100"
+        onClick={handleClear}
+        className="w-full py-1 text-[8px] uppercase tracking-[0.3em] text-cyber-ice/20 hover:text-red-400 transition-colors flex items-center justify-center gap-2"
       >
-        <Trash2 size={12} className="group-hover:animate-bounce" />
-        Purge Local Data
+        <Trash2 size={10} />
+        [ERASE_USER_VECTORS]
       </button>
     </div>
   );

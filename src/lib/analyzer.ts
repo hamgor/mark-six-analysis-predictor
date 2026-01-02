@@ -1,45 +1,88 @@
 import { Draw } from './data';
+export interface HotColdStats {
+  hot: { number: number; weight: number }[];
+  cold: { number: number; weight: number }[];
+}
+export interface PairStats {
+  pair: [number, number];
+  count: number;
+}
 export class MarkSixAnalyzer {
   private draws: Draw[];
   constructor(draws: Draw[]) {
-    // Newer draws first in our data, so we treat index 0 as most recent
     this.draws = draws;
   }
-  /**
-   * Calculates frequencies with a 10% compounding weight increase every 5 draws.
-   * Latest 5 draws: weight 1.0
-   * Next 5 draws: weight 0.9 (or latest is 1.0 * 1.1^X)
-   * Calculation: newest batch has highest weight.
-   */
   getWeightedFrequencies(): Map<number, number> {
     const frequencyMap = new Map<number, number>();
-    // Group into batches of 5 starting from the most recent (index 0)
     this.draws.forEach((draw, index) => {
       const batchIndex = Math.floor(index / 5);
-      // Weight decreases as we go back in time (Batch 0 is newest)
-      // Compound 10% increase for NEWER batches means 1.1^(-batchIndex)
       const weight = Math.pow(1.1, -batchIndex);
+      // Weight primary numbers
       draw.numbers.forEach(num => {
         const current = frequencyMap.get(num) ?? 0;
         frequencyMap.set(num, current + weight);
       });
+      // Weight special number at 50% impact if present
+      if (draw.special !== undefined) {
+        const current = frequencyMap.get(draw.special) ?? 0;
+        frequencyMap.set(draw.special, current + (weight * 0.5));
+      }
     });
     return frequencyMap;
   }
+  getHotColdStats(): HotColdStats {
+    const weightedMap = this.getWeightedFrequencies();
+    const sorted = Array.from(weightedMap.entries())
+      .map(([number, weight]) => ({ number, weight }))
+      .sort((a, b) => b.weight - a.weight);
+    return {
+      hot: sorted.slice(0, 10),
+      cold: sorted.slice(-10).reverse(),
+    };
+  }
+  getFrequentPairs(): PairStats[] {
+    const pairCounts = new Map<string, number>();
+    this.draws.slice(0, 20).forEach(draw => {
+      const nums = draw.numbers;
+      for (let i = 0; i < nums.length; i++) {
+        for (let j = i + 1; j < nums.length; j++) {
+          const pair = [nums[i], nums[j]].sort((a, b) => a - b);
+          const key = pair.join(',');
+          pairCounts.set(key, (pairCounts.get(key) ?? 0) + 1);
+        }
+      }
+    });
+    return Array.from(pairCounts.entries())
+      .map(([key, count]) => ({
+        pair: key.split(',').map(Number) as [number, number],
+        count
+      }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 5);
+  }
+  getCoverageSet(): number[] {
+    const weightedMap = this.getWeightedFrequencies();
+    const sorted = Array.from(weightedMap.entries()).sort((a, b) => b[1] - a[1]);
+    const totalWeight = sorted.reduce((sum, curr) => sum + curr[1], 0);
+    let currentWeight = 0;
+    const coverage: number[] = [];
+    for (const [num, weight] of sorted) {
+      coverage.push(num);
+      currentWeight += weight;
+      if (currentWeight / totalWeight >= 0.75) break;
+    }
+    return coverage;
+  }
   generatePredictions(count: number = 3): number[][] {
     const weightedMap = this.getWeightedFrequencies();
-    const entries = Array.from(weightedMap.entries())
-      .sort((a, b) => b[1] - a[1]); // Highest frequency first
+    const entries = Array.from(weightedMap.entries()).sort((a, b) => b[1] - a[1]);
     const predictions: number[][] = [];
+    const hotspotPool = entries.slice(0, 18).map(e => e[0]);
     for (let i = 0; i < count; i++) {
-      // Logic: Pick from top weighted numbers but add small randomization
-      // to avoid identical sets while staying in high-probability "Hotspots"
       const set = new Set<number>();
-      // We pick 6 numbers from the top 18 weighted hotspots
-      const pool = entries.slice(0, 18).map(e => e[0]);
       while (set.size < 6) {
-        const randomIndex = Math.floor(Math.random() * pool.length);
-        set.add(pool[randomIndex]);
+        const randomIndex = Math.floor(Math.random() * hotspotPool.length);
+        set.add(hotspotPool[randomIndex]);
       }
       predictions.push(Array.from(set).sort((a, b) => a - b));
     }
